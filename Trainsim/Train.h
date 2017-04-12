@@ -11,11 +11,13 @@ using namespace std;
 class Train
 {
 public:
-  Train();
+  Train(string name, Route* route, int speed);
   ~Train();
+  vector<Train*>::iterator Drive(vector<Train*>* trains);
 
 private:
   string name_;
-  pair<Leg, int> position_;
-  vector<Station> route_;
+  Route* route_;
+  pair<Leg*, int> position_; // Leg (From and To station) and the distance from the From station of the leg
+  int speed_;
 };

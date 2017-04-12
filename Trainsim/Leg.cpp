@@ -2,8 +2,11 @@
 
 // Leg.cpp defines the methods of the Leg class
 
-Leg::Leg()
+Leg::Leg(Station* from, Station* to, int distance)
 {
+  from_ = from;
+  to_ = to;
+  distance_ = distance;
 }
 
 Leg::~Leg()

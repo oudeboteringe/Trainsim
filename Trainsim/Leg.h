@@ -7,9 +7,11 @@
 class Leg
 {
 public:
-  Leg();
+  Leg(Station* from, Station* to, int distance);
   ~Leg();
 
 private:
-  pair<Station, Station> fromTo_;
+  Station* from_;
+  Station* to_;
+  int distance_;
 };

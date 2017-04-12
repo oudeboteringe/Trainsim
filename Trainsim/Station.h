@@ -8,7 +8,7 @@ using namespace std;
 class Station
 {
 public:
-  Station();
+  Station(string name);
   ~Station();
 
 private:
