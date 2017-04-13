@@ -13,7 +13,9 @@ class Train
 public:
   Train(string name, Route* route, int speed);
   ~Train();
-  vector<Train*>::iterator Drive(vector<Train*>* trains);
+  vector<Train*>::iterator drive(vector<Train*>* trains);
+  string getName();
+  pair<Leg*, int>* getPosition();
 
 private:
   string name_;

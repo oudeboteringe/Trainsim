@@ -10,6 +10,7 @@ class Station
 public:
   Station(string name);
   ~Station();
+  string getName();
 
 private:
   string name_;

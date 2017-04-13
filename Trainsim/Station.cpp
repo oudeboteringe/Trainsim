@@ -9,3 +9,8 @@ Station::Station(string name)
 Station::~Station()
 {
 }
+
+string Station::getName()
+{
+  return name_;
+}

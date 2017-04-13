@@ -12,3 +12,18 @@ Leg::Leg(Station* from, Station* to, int distance)
 Leg::~Leg()
 {
 }
+
+Station * Leg::getFrom()
+{
+  return from_;
+}
+
+Station * Leg::getTo()
+{
+  return to_;
+}
+
+int Leg::getDistance()
+{
+  return distance_;
+}

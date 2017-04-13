@@ -9,6 +9,33 @@ using namespace std;
 #include "Route.h"
 #include "Train.h"
 
+void driveTrains(vector<Train*>* trains)
+{
+  for (vector<Train*>::iterator itTrainVec = trains->begin(); itTrainVec != trains->end(); itTrainVec++)
+  {
+    vector<Train*>::iterator itOtherTrain = (*itTrainVec)->drive(trains);
+    if ((*itOtherTrain) != *itTrainVec) // Conflict
+    {
+      trains->erase(itOtherTrain);
+      trains->erase(itTrainVec);
+    }
+  }
+}
+
+void printTrainStates(vector<Train*>* trains)
+{
+  for (vector<Train*>::iterator itTrainVec = trains->begin(); itTrainVec != trains->end(); itTrainVec++)
+  {
+    pair<Leg*, int>* position = (*itTrainVec)->getPosition();
+    string fromStation = position->first->getFrom()->getName();
+    string toStation = position->first->getTo()->getName();
+    int distance = position->first->getDistance();
+    int fraction = position->second;
+    cout << "State of train " << (*itTrainVec)->getName() << ":" << endl;
+    cout << "On leg from: " << fromStation << " To: " << toStation << "(" << fraction << "/"  << distance << ")" << endl;
+  }
+}
+
 int main()
 {
   int speed = 1;
@@ -47,15 +74,8 @@ int main()
   char character = 'c';
   while ((trainVector.size() > 0) && nextStep)
   {
-    for (vector<Train*>::iterator itTrainVec = trainVector.begin(); itTrainVec != trainVector.end(); itTrainVec++)
-    {
-      vector<Train*>::iterator itOtherTrain = (*itTrainVec)->Drive(&trainVector);
-      if ((*itOtherTrain) != *itTrainVec) // Conflict
-      {
-        trainVector.erase(itOtherTrain);
-        trainVector.erase(itTrainVec);
-      }
-    }
+    driveTrains(&trainVector);
+    printTrainStates(&trainVector);
     cout << "Press <enter> to simulate next step or s(top) to stop." << endl;
     cin >> character;
     if (character == 's')

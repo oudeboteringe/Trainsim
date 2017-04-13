@@ -15,7 +15,7 @@ Train::~Train()
 {
 }
 
-vector<Train*>::iterator Train::Drive(vector<Train*>* trains)
+vector<Train*>::iterator Train::drive(vector<Train*>* trains)
 {
   // Move the position of the train by the speed:
   for (int iStep = 0; iStep < speed_; iStep++)
@@ -28,4 +28,14 @@ vector<Train*>::iterator Train::Drive(vector<Train*>* trains)
     // TODO
   }
   return trains->begin(); // TODO: return iterator to ourself (default) or to conflicting train (collision).
+}
+
+string Train::getName()
+{
+  return name_;
+}
+
+pair<Leg*, int>* Train::getPosition()
+{
+  return &position_;
 }
