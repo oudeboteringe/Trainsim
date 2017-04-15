@@ -24,16 +24,41 @@ void driveTrains(vector<Train*>* trains)
 
 void printTrainStates(vector<Train*>* trains)
 {
+  if (trains->size() <= 0)
+  {
+    cout << "No trains in simulation." << endl;
+  }
   for (vector<Train*>::iterator itTrainVec = trains->begin(); itTrainVec != trains->end(); itTrainVec++)
   {
-    pair<Leg*, int>* position = (*itTrainVec)->getPosition();
-    string fromStation = position->first->getFrom()->getName();
-    string toStation = position->first->getTo()->getName();
-    int distance = position->first->getDistance();
-    int fraction = position->second;
+    pair<size_t, size_t> position = (*itTrainVec)->getPosition();
+    string fromStation = (*itTrainVec)->getRoute()->getLeg(position.first)->getFrom()->getName();
+    string toStation = (*itTrainVec)->getRoute()->getLeg(position.first)->getTo()->getName();
+    size_t distance = (*itTrainVec)->getRoute()->getLeg(position.first)->getDistance();
+    size_t fraction = position.second;
     cout << "State of train " << (*itTrainVec)->getName() << ":" << endl;
-    cout << "On leg from: " << fromStation << " To: " << toStation << "(" << fraction << "/"  << distance << ")" << endl;
+    if (fraction == 0)
+    {
+      cout << "At station: " << fromStation << endl;
+    }
+    else if (fraction == (*itTrainVec)->getRoute()->getLeg(position.first)->getDistance())
+    {
+      cout << "At station: " << toStation << endl;
+    }
+    else
+    {
+      cout << "On leg between " << fromStation << " and " << toStation << "(" << fraction << "/" << distance << ")" << endl;
+    }
+
+    if ((*itTrainVec)->getPosition() == (*itTrainVec)->getRoute()->getEnd())
+    {
+      cout << "Destination reached!" << endl;
+    }
   }
+}
+
+// Clean up (delete from train vector) all trains that have collided or have reached their destination
+void cleanUp(vector<Train*>* trains)
+{
 }
 
 int main()
@@ -60,6 +85,7 @@ int main()
 
   // Construct the route of train1:
   Route* route1 = new Route;
+
   // Add the legs:
   route1->AddLeg(leg1, 1);
   route1->AddLeg(leg4, 1);
@@ -70,16 +96,22 @@ int main()
   vector<Train*> trainVector;
   trainVector.push_back(train1);
 
-  bool nextStep = true;
-  char character = 'c';
-  while ((trainVector.size() > 0) && nextStep)
+  cout << "Welcome to trainsim, a basic train simulation program." << endl;
+  cout << "Initial states of the trains:" << endl;
+
+  bool continueSim = true;
+  while (continueSim)
   {
-    driveTrains(&trainVector);
     printTrainStates(&trainVector);
-    cout << "Press <enter> to simulate next step or s(top) <enter> to stop." << endl;
+    cleanUp(&trainVector);
+    cout << "Press <enter> to continue the simulation or press s(top) <enter> to stop." << endl;
     if (cin.get() == 's')
     {
-      nextStep = false;
+      continueSim = false;
+    }
+    if (continueSim)
+    {
+      driveTrains(&trainVector);
     }
   }
 

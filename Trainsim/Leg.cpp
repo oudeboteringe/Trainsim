@@ -23,7 +23,7 @@ Station * Leg::getTo()
   return to_;
 }
 
-int Leg::getDistance()
+size_t Leg::getDistance()
 {
   return distance_;
 }

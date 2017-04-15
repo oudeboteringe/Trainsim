@@ -15,11 +15,13 @@ public:
   ~Train();
   vector<Train*>::iterator drive(vector<Train*>* trains);
   string getName();
-  pair<Leg*, int>* getPosition();
+  pair<size_t, size_t> getPosition();
+  Route* getRoute();
 
 private:
   string name_;
   Route* route_;
-  pair<Leg*, int> position_; // Leg (From and To station) and the distance from the From station of the leg
+  pair<size_t, size_t> position_; // Leg index and the distance from the From station of the leg
   int speed_;
+  bool collided_;
 };

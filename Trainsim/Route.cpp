@@ -13,29 +13,32 @@ void Route::AddLeg(Leg* leg, int direction)
   legs_.push_back(make_pair(leg, direction));
 }
 
-int Route::GetDirection(Leg * leg)
+Leg * Route::getLeg(size_t legIndex)
 {
-
-  // Search for this leg:
-  for (vector<pair<Leg*, int> >::iterator itLegs = legs_.begin(); itLegs != legs_.end(); itLegs++)
-  {
-    if ((*itLegs).first == leg) // Leg found
-    {
-      if ((*itLegs).second == 1)
-      {
-        return 1;
-      }
-      else
-      {
-        return -1;
-      }
-    }
-  }
-  return 0; // leg not found
+  return legs_.operator[](legIndex).first;
 }
 
-pair<Leg*, int> Route::GetBegin()
+int Route::getDirection(size_t legIndex)
 {
-  Leg* firstLeg = (legs_.begin())->first;
-  return make_pair(firstLeg, 0);
+  return legs_.operator[](legIndex).second;
+}
+
+size_t Route::getDistance(size_t legIndex)
+{
+  return legs_.operator[](legIndex).first->getDistance();
+}
+
+pair<size_t, size_t> Route::GetBegin()
+{
+  return make_pair(0, 0);
+}
+
+pair<size_t, size_t> Route::getEnd()
+{
+  size_t fraction = (legs_.operator[](legs_.size() - 1)).first->getDistance();
+  if ((legs_.operator[](legs_.size() - 1)).second == -1) // Traverse last leg reversed
+  {
+    fraction = 0;
+  }
+  return make_pair(legs_.size()-1, fraction);
 }

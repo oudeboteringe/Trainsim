@@ -11,7 +11,7 @@ public:
   ~Leg();
   Station* getFrom();
   Station* getTo();
-  int getDistance();
+  size_t getDistance();
 
 private:
   Station* from_;

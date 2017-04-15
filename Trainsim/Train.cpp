@@ -3,7 +3,7 @@
 #include "Route.h"
 #include "Train.h"
 
-Train::Train(string name, Route* route, int speed)
+Train::Train(string name, Route* route, int speed):collided_(false)
 {
   name_ = name;
   route_ = route;
@@ -17,15 +17,33 @@ Train::~Train()
 
 vector<Train*>::iterator Train::drive(vector<Train*>* trains)
 {
-  // Move the position of the train by the speed:
-  for (int iStep = 0; iStep < speed_; iStep++)
+  // If the train hasn't collided and hasn't reached its destination yet, move it's position by the speed:
+  for (int iStep = 0; (iStep < speed_ && !collided_ && !(position_ == route_->getEnd())); iStep++)
   {
-    Leg* currentLeg = position_.first;
-    int direction = route_->GetDirection(currentLeg);
-    position_.second = position_.second + direction;
 
-    // Have we reached the end of the leg?
-    // TODO
+    // Have we not yet reached the end of the route?
+    if (!(position_ == route_->getEnd()))
+    {
+
+      if (position_.second >= route_->getDistance(position_.first)) // Proceed to next leg:
+      {
+        position_.first++;
+        if (route_->getDirection(position_.first) == 1) // Default
+        {
+          position_.second = 0;
+        }
+        else // Reversed traversal
+        {
+          position_.second = route_->getDistance(position_.first);
+        }
+      }
+
+      // Move train
+      int direction = route_->getDirection(position_.first);
+      position_.second = position_.second + direction;
+    }
+
+    // TODO: Have we collided?
   }
   return trains->begin(); // TODO: return iterator to ourself (default) or to conflicting train (collision).
 }
@@ -35,7 +53,12 @@ string Train::getName()
   return name_;
 }
 
-pair<Leg*, int>* Train::getPosition()
+pair<size_t, size_t> Train::getPosition()
 {
-  return &position_;
+  return position_;
+}
+
+Route * Train::getRoute()
+{
+  return route_;
 }
