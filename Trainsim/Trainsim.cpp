@@ -6,8 +6,47 @@
 #include <iostream>
 using namespace std;
 
+#include "Network.h"
 #include "Route.h"
 #include "Train.h"
+
+Network* readNetworkConfig(string networkConfigFilename)
+{
+  Network* network = new Network();
+
+  // Construct the legs including their stations:
+  network->addLeg(string("Amsterdam"), string("Haarlem"), 20);
+  network->addLeg(string("Amsterdam"), string("Zaandam"), 15);
+  network->addLeg(string("Zaandam"), string("Alkmaar"), 40);
+  network->addLeg(string("Haarlem"), string("Leiden"), 30);
+  network->addLeg(string("Leiden"), string("Den Haag"), 10);
+  network->addLeg(string("Den Haag"), string("Utrecht"), 70);
+  network->addLeg(string("Utrecht"), string("Amsterdam"), 50);
+
+  return network;
+}
+
+vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
+{
+  vector<Train*>* trainVector = new vector<Train*>;
+
+  // Construct the route of train1:
+  Route* route1 = new Route;
+
+  // Add the legs:
+  pair<Leg*, int> legAndDir = network->getLeg(string("Amsterdam"), string("Haarlem"));
+  route1->AddLeg(legAndDir.first, legAndDir.second);
+  legAndDir = network->getLeg(string("Haarlem"), string("Leiden"));
+  route1->AddLeg(legAndDir.first, legAndDir.second);
+  legAndDir = network->getLeg(string("Leiden"), string("Den Haag"));
+  route1->AddLeg(legAndDir.first, legAndDir.second);
+
+  Train* train1 = new Train("train1", route1, 1);
+
+  trainVector->push_back(train1);
+  return trainVector;
+
+}
 
 void driveTrains(vector<Train*>* trains)
 {
@@ -64,37 +103,10 @@ void cleanUp(vector<Train*>* trains)
 int main()
 {
   int speed = 1;
-
-  // Construct the stations:
-  Station* amsterdam = new Station("Amsterdam");
-  Station* zaandam = new Station("Zaandam");
-  Station* alkmaar = new Station("Alkmaar");
-  Station* haarlem = new Station("Haarlem");
-  Station* leiden = new Station("Leiden");
-  Station* denHaag = new Station("Den Haag");
-  Station* utrecht = new Station("Utrecht");
-
-  // Construct the legs:
-  Leg* leg1 = new Leg(amsterdam, haarlem, 20);
-  Leg* leg2 = new Leg(amsterdam, zaandam, 15);
-  Leg* leg3 = new Leg(zaandam, alkmaar, 40);
-  Leg* leg4 = new Leg(haarlem, leiden, 30);
-  Leg* leg5 = new Leg(leiden, denHaag, 10);
-  Leg* leg6 = new Leg(denHaag, utrecht, 70);
-  Leg* leg7 = new Leg(utrecht, amsterdam, 50);
-
-  // Construct the route of train1:
-  Route* route1 = new Route;
-
-  // Add the legs:
-  route1->AddLeg(leg1, 1);
-  route1->AddLeg(leg4, 1);
-  route1->AddLeg(leg5, 1);
-
-  Train* train1 = new Train("train1", route1, speed);
-
-  vector<Train*> trainVector;
-  trainVector.push_back(train1);
+  string networkConfigFilename = ".\\Network.cfg";
+  string trainConfigFilename = ".\\Trains.cfg";
+  Network* network = readNetworkConfig(networkConfigFilename);
+  vector<Train*>* trainVector = readTrainConfig(trainConfigFilename, network);
 
   cout << "Welcome to trainsim, a basic train simulation program." << endl;
   cout << "Initial states of the trains:" << endl;
@@ -102,8 +114,8 @@ int main()
   bool continueSim = true;
   while (continueSim)
   {
-    printTrainStates(&trainVector);
-    cleanUp(&trainVector);
+    printTrainStates(trainVector);
+    cleanUp(trainVector);
     cout << "Press <enter> to continue the simulation or press s(top) <enter> to stop." << endl;
     if (cin.get() == 's')
     {
@@ -111,7 +123,7 @@ int main()
     }
     if (continueSim)
     {
-      driveTrains(&trainVector);
+      driveTrains(trainVector);
     }
   }
 

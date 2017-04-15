@@ -7,7 +7,7 @@
 class Leg
 {
 public:
-  Leg(Station* from, Station* to, int distance);
+  Leg(Station* from, Station* to, size_t distance);
   ~Leg();
   Station* getFrom();
   Station* getTo();
@@ -16,5 +16,5 @@ public:
 private:
   Station* from_;
   Station* to_;
-  int distance_;
+  size_t distance_;
 };
