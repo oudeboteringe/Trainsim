@@ -9,19 +9,29 @@ using namespace std;
 #include "Network.h"
 #include "Route.h"
 #include "Train.h"
+#include "pugixml.hpp"
 
 Network* readNetworkConfig(string networkConfigFilename)
 {
+
+  pugi::xml_document networkConfigDoc;
+  pugi::xml_parse_result result = networkConfigDoc.load_file(networkConfigFilename.c_str());
+  if (!result)
+  {
+    cout << "Could not load network configuration file." << endl;
+    return nullptr;
+  }
+
   Network* network = new Network();
 
   // Construct the legs including their stations:
-  network->addLeg(string("Amsterdam"), string("Haarlem"), 20);
-  network->addLeg(string("Amsterdam"), string("Zaandam"), 15);
-  network->addLeg(string("Zaandam"), string("Alkmaar"), 40);
-  network->addLeg(string("Haarlem"), string("Leiden"), 30);
-  network->addLeg(string("Leiden"), string("Den Haag"), 10);
-  network->addLeg(string("Den Haag"), string("Utrecht"), 70);
-  network->addLeg(string("Utrecht"), string("Amsterdam"), 50);
+  for (pugi::xml_node newLeg = networkConfigDoc.child("Leg"); newLeg; newLeg = newLeg.next_sibling("Leg"))
+  {
+    string legFrom = newLeg.child("from").text().as_string();
+    string legTo = newLeg.child("to").text().as_string();
+    size_t legDist = (size_t)newLeg.child("distance").text().as_int();
+    network->addLeg(legFrom, legTo, legDist);
+  }
 
   return network;
 }
@@ -103,7 +113,7 @@ void cleanUp(vector<Train*>* trains)
 int main()
 {
   int speed = 1;
-  string networkConfigFilename = ".\\Network.cfg";
+  string networkConfigFilename = "C:/Temp/Network.cfg";
   string trainConfigFilename = ".\\Trains.cfg";
   Network* network = readNetworkConfig(networkConfigFilename);
   vector<Train*>* trainVector = readTrainConfig(trainConfigFilename, network);
