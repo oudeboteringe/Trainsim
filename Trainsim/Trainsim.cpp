@@ -9,43 +9,84 @@ using namespace std;
 #include "Network.h"
 #include "Route.h"
 #include "Train.h"
+#include "pugixml.hpp"
 
 Network* readNetworkConfig(string networkConfigFilename)
 {
+
+  pugi::xml_document networkConfigDoc;
+  pugi::xml_parse_result result = networkConfigDoc.load_file(networkConfigFilename.c_str());
+  if (!result)
+  {
+    cout << "Could not load network configuration file." << endl;
+    return nullptr;
+  }
+
   Network* network = new Network();
 
   // Construct the legs including their stations:
-  network->addLeg(string("Amsterdam"), string("Haarlem"), 20);
-  network->addLeg(string("Amsterdam"), string("Zaandam"), 15);
-  network->addLeg(string("Zaandam"), string("Alkmaar"), 40);
-  network->addLeg(string("Haarlem"), string("Leiden"), 30);
-  network->addLeg(string("Leiden"), string("Den Haag"), 10);
-  network->addLeg(string("Den Haag"), string("Utrecht"), 70);
-  network->addLeg(string("Utrecht"), string("Amsterdam"), 50);
+  for (pugi::xml_node newLeg = networkConfigDoc.child("leg"); newLeg; newLeg = newLeg.next_sibling("leg"))
+  {
+    string legFrom = newLeg.child("from").text().as_string();
+    string legTo = newLeg.child("to").text().as_string();
+    size_t legDist = (size_t)newLeg.child("distance").text().as_int();
+    network->addLeg(legFrom, legTo, legDist);
+  }
 
   return network;
 }
 
 vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
 {
-  vector<Train*>* trainVector = new vector<Train*>;
+  pugi::xml_document trainConfigDoc;
+  pugi::xml_parse_result result = trainConfigDoc.load_file(trainConfigFilename.c_str());
+  if (!result)
+  {
+    cout << "Could not load train configuration file." << endl;
+    return nullptr;
+  }
 
-  // Construct the route of train1:
-  Route* route1 = new Route;
+  vector<Train*>* trains = new vector<Train*>;
 
-  // Add the legs:
-  pair<Leg*, int> legAndDir = network->getLeg(string("Amsterdam"), string("Haarlem"));
-  route1->AddLeg(legAndDir.first, legAndDir.second);
-  legAndDir = network->getLeg(string("Haarlem"), string("Leiden"));
-  route1->AddLeg(legAndDir.first, legAndDir.second);
-  legAndDir = network->getLeg(string("Leiden"), string("Den Haag"));
-  route1->AddLeg(legAndDir.first, legAndDir.second);
+  // Retreive the data for the trains:
+  for (pugi::xml_node newTrain = trainConfigDoc.child("train"); newTrain; newTrain = newTrain.next_sibling("train"))
+  {
+    string name = newTrain.child("name").text().as_string();
+    int speed = newTrain.child("speed").text().as_int();
+    pugi::xml_node route = newTrain.child("route");
 
-  Train* train1 = new Train("train1", route1, 1);
+    // Construct the route of this train:
+    Route* newRoute = new Route;
 
-  trainVector->push_back(train1);
-  return trainVector;
+    pugi::xml_node prevStation = route.child("station");              // First time: first station
+    pugi::xml_node nextStation = prevStation.next_sibling("station"); // First time: second station
 
+    while (nextStation)
+    {
+      string prevStationName = prevStation.text().as_string();
+      string nextStationName = nextStation.text().as_string();
+
+      // Get this leg:
+      pair<Leg*, int> legAndDir = network->getLeg(prevStationName, nextStationName);
+
+      if (true)
+      {
+        // Add this leg to the route:
+        newRoute->AddLeg(legAndDir.first, legAndDir.second);
+      }
+      else // TODO: error handling
+      {
+        ;
+      }
+
+      prevStation = nextStation;
+      nextStation = nextStation.next_sibling("station");
+    }
+    Train* train = new Train(name, newRoute, speed);
+    trains->push_back(train);
+  }
+
+  return trains;
 }
 
 void driveTrains(vector<Train*>* trains)
@@ -55,8 +96,8 @@ void driveTrains(vector<Train*>* trains)
     vector<Train*>::iterator itOtherTrain = (*itTrainVec)->drive(trains);
     if ((*itOtherTrain) != *itTrainVec) // Conflict
     {
-      trains->erase(itOtherTrain);
-      trains->erase(itTrainVec);
+      //trains->erase(itOtherTrain);
+      //trains->erase(itTrainVec);
     }
   }
 }
@@ -70,16 +111,16 @@ void printTrainStates(vector<Train*>* trains)
   for (vector<Train*>::iterator itTrainVec = trains->begin(); itTrainVec != trains->end(); itTrainVec++)
   {
     pair<size_t, size_t> position = (*itTrainVec)->getPosition();
-    string fromStation = (*itTrainVec)->getRoute()->getLeg(position.first)->getFrom()->getName();
-    string toStation = (*itTrainVec)->getRoute()->getLeg(position.first)->getTo()->getName();
-    size_t distance = (*itTrainVec)->getRoute()->getLeg(position.first)->getDistance();
+    string fromStation = (*itTrainVec)->getRoute()->GetLeg(position.first)->getFrom()->getName();
+    string toStation = (*itTrainVec)->getRoute()->GetLeg(position.first)->getTo()->getName();
+    size_t distance = (*itTrainVec)->getRoute()->GetLeg(position.first)->getDistance();
     size_t fraction = position.second;
     cout << "State of train " << (*itTrainVec)->getName() << ":" << endl;
     if (fraction == 0)
     {
       cout << "At station: " << fromStation << endl;
     }
-    else if (fraction == (*itTrainVec)->getRoute()->getLeg(position.first)->getDistance())
+    else if (fraction == (*itTrainVec)->getRoute()->GetLeg(position.first)->getDistance())
     {
       cout << "At station: " << toStation << endl;
     }
@@ -88,7 +129,7 @@ void printTrainStates(vector<Train*>* trains)
       cout << "On leg between " << fromStation << " and " << toStation << "(" << fraction << "/" << distance << ")" << endl;
     }
 
-    if ((*itTrainVec)->getPosition() == (*itTrainVec)->getRoute()->getEnd())
+    if ((*itTrainVec)->getPosition() == (*itTrainVec)->getRoute()->GetEnd())
     {
       cout << "Destination reached!" << endl;
     }
@@ -102,13 +143,14 @@ void cleanUp(vector<Train*>* trains)
 
 int main()
 {
+  cout << "Welcome to trainsim, a basic train simulation program." << endl;
+
   int speed = 1;
-  string networkConfigFilename = ".\\Network.cfg";
-  string trainConfigFilename = ".\\Trains.cfg";
+  string networkConfigFilename = "C:/Temp/Network.cfg";
+  string trainConfigFilename = "C:/Temp/Trains.cfg";
   Network* network = readNetworkConfig(networkConfigFilename);
   vector<Train*>* trainVector = readTrainConfig(trainConfigFilename, network);
 
-  cout << "Welcome to trainsim, a basic train simulation program." << endl;
   cout << "Initial states of the trains:" << endl;
 
   bool continueSim = true;

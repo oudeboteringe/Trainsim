@@ -13,11 +13,11 @@ public:
   Route();
   ~Route();
   void AddLeg(Leg* leg, int direction); // Add a leg (plus direction) on that leg to a route
-  Leg* getLeg(size_t legIndex);
-  int getDirection(size_t legIndex);
-  size_t getDistance(size_t legIndex);
+  Leg* GetLeg(size_t legIndex);
+  int GetDirection(size_t legIndex);
+  size_t GetDistance(size_t legIndex);
   pair<size_t, size_t> GetBegin();
-  pair<size_t, size_t> getEnd();
+  pair<size_t, size_t> GetEnd();
 
 private:
   // The route consists of a number of legs.
