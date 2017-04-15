@@ -76,9 +76,8 @@ int main()
   {
     driveTrains(&trainVector);
     printTrainStates(&trainVector);
-    cout << "Press <enter> to simulate next step or s(top) to stop." << endl;
-    cin >> character;
-    if (character == 's')
+    cout << "Press <enter> to simulate next step or s(top) <enter> to stop." << endl;
+    if (cin.get() == 's')
     {
       nextStep = false;
     }
