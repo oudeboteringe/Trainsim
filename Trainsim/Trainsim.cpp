@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include <conio.h>
+#include <fstream>
 #include <iostream>
 using namespace std;
 
@@ -130,7 +131,9 @@ void printAndCleanUp(vector<Train*>* trains)
     {
       if ((otherTrain != nullptr) && (otherTrain != (*itTrains)))
       {
-        cout << "Train " << (*itTrains)->GetName() << " collided with train " << otherTrain->GetName() << endl;
+        string msg = string("Train ") + (*itTrains)->GetName() + " collided with train " + otherTrain->GetName();
+        cout << msg << endl;
+        std::clog << msg << endl;
         otherTrain->SetCollidedWith(otherTrain); // Trick to signal other train is also to be deleted, but nothing should be printed.
       }
       delete (*itTrains);
@@ -147,6 +150,15 @@ void printAndCleanUp(vector<Train*>* trains)
 int main()
 {
   cout << "Welcome to trainsim, a basic train simulation program." << endl;
+
+  std::ofstream logFile("trainsim.log");
+
+  // Get the rdbuf of clog.
+  // We need it to reset the value before exiting.
+  auto old_rdbuf = std::clog.rdbuf();
+
+  // Set the rdbuf of clog.
+  std::clog.rdbuf(logFile.rdbuf());
 
   int speed = 1;
   string networkConfigFilename = "./Network.cfg";
@@ -186,6 +198,10 @@ int main()
     trains->erase(trains->begin()); // Erase the entry from the vector<Train*>
   }
   delete trains;
+
+  // Reset the rdbuf of clog.
+  std::clog.rdbuf(old_rdbuf);
+
   _getch();
   return 0;
 }
