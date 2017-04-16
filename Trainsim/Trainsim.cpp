@@ -26,7 +26,6 @@ Network* readNetworkConfig(string networkConfigFilename)
 
   // Construct the legs including their stations:
   for (pugi::xml_node newLeg = networkConfigDoc.child("leg"); newLeg; newLeg = newLeg.next_sibling("leg"))
-  for (pugi::xml_node newLeg = networkConfigDoc.child("Leg"); newLeg; newLeg = newLeg.next_sibling("Leg"))
   {
     string legFrom = newLeg.child("from").text().as_string();
     string legTo = newLeg.child("to").text().as_string();
@@ -147,19 +146,22 @@ int main()
   cout << "Welcome to trainsim, a basic train simulation program." << endl;
 
   int speed = 1;
-  string networkConfigFilename = "C:/Temp/Network.cfg";
-  string trainConfigFilename = "C:/Temp/Trains.cfg";
-  string trainConfigFilename = ".\\Trains.cfg";
+  string networkConfigFilename = "./Network.cfg";
+  string trainConfigFilename = "./Trains.cfg";
   Network* network = readNetworkConfig(networkConfigFilename);
-  vector<Train*>* trainVector = readTrainConfig(trainConfigFilename, network);
+  vector<Train*>* trains = readTrainConfig(trainConfigFilename, network);
 
-  cout << "Initial states of the trains:" << endl;
+  bool continueSim = (network && trains);
 
-  bool continueSim = true;
+  if (continueSim)
+  {
+    cout << "Initial states of the trains:" << endl;
+  }
+
   while (continueSim)
   {
-    printTrainStates(trainVector);
-    cleanUp(trainVector);
+    printTrainStates(trains);
+    cleanUp(trains);
     cout << "Press <enter> to continue the simulation or press s(top) <enter> to stop." << endl;
     if (cin.get() == 's')
     {
@@ -167,7 +169,7 @@ int main()
     }
     if (continueSim)
     {
-      driveTrains(trainVector);
+      driveTrains(trains);
     }
   }
 
