@@ -19,7 +19,8 @@ Network* readNetworkConfig(string networkConfigFilename)
   pugi::xml_parse_result result = networkConfigDoc.load_file(networkConfigFilename.c_str());
   if (!result)
   {
-    cout << "Could not load network configuration file." << endl;
+    cout << "Could not load network configuration file (Network.cfg)." << endl;
+    clog << "Could not load network configuration file (Network.cfg)." << endl;
     return nullptr;
   }
 
@@ -43,7 +44,8 @@ vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
   pugi::xml_parse_result result = trainConfigDoc.load_file(trainConfigFilename.c_str());
   if (!result)
   {
-    cout << "Could not load train configuration file." << endl;
+    cout << "Could not load train configuration file (Trains.cfg)." << endl;
+    clog << "Could not load train configuration file (Trains.cfg)." << endl;
     return nullptr;
   }
 
@@ -133,7 +135,7 @@ void printAndCleanUp(vector<Train*>* trains)
       {
         string msg = string("Train ") + (*itTrains)->GetName() + " collided with train " + otherTrain->GetName();
         cout << msg << endl;
-        std::clog << msg << endl;
+        clog << msg << endl;
         otherTrain->SetCollidedWith(otherTrain); // Trick to signal other train is also to be deleted, but nothing should be printed.
       }
       delete (*itTrains);
@@ -151,14 +153,14 @@ int main()
 {
   cout << "Welcome to trainsim, a basic train simulation program." << endl;
 
-  std::ofstream logFile("trainsim.log");
+  ofstream logFile("trainsim.log");
 
   // Get the rdbuf of clog.
   // We need it to reset the value before exiting.
-  auto old_rdbuf = std::clog.rdbuf();
+  auto old_rdbuf = clog.rdbuf();
 
   // Set the rdbuf of clog.
-  std::clog.rdbuf(logFile.rdbuf());
+  clog.rdbuf(logFile.rdbuf());
 
   int speed = 1;
   string networkConfigFilename = "./Network.cfg";
@@ -192,7 +194,7 @@ int main()
 
   cout << "Press any key to exit." << endl;
   delete network;
-  while (trains->begin() != trains->end())
+  while ( (trains != nullptr) && (trains->begin() != trains->end()) )
   {
     delete *(trains->begin()); // Delete the train
     trains->erase(trains->begin()); // Erase the entry from the vector<Train*>
@@ -200,7 +202,7 @@ int main()
   delete trains;
 
   // Reset the rdbuf of clog.
-  std::clog.rdbuf(old_rdbuf);
+  clog.rdbuf(old_rdbuf);
 
   _getch();
   return 0;
