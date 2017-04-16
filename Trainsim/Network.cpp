@@ -8,6 +8,18 @@ Network::Network()
 
 Network::~Network()
 {
+  // Delete the legs:
+  while (legs_.begin() != legs_.end())
+  {
+    legs_.erase(legs_.begin());
+  }
+
+  // Delete the stations:
+  while (stations_.begin() != stations_.end())
+  {
+    delete stations_.begin()->second; // Delete the station
+    stations_.erase(stations_.begin()); // Erase the entry from the map<string, Station*>
+  }
 }
 
 void Network::addStation(Station * station)

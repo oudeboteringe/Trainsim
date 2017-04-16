@@ -102,25 +102,27 @@ void driveTrains(vector<Train*>* trains)
   }
 }
 
-void printTrainStates(vector<Train*>* trains)
+void printAndCleanUp(vector<Train*>* trains)
 {
   if (trains->size() <= 0)
   {
     cout << "No trains in simulation." << endl;
   }
-  for (vector<Train*>::iterator itTrainVec = trains->begin(); itTrainVec != trains->end(); itTrainVec++)
+  
+  vector<Train*>::iterator itTrains = trains->begin();
+  while (itTrains < trains->end())
   {
-    pair<size_t, size_t> position = (*itTrainVec)->getPosition();
-    string fromStation = (*itTrainVec)->getRoute()->GetLeg(position.first)->getFrom()->getName();
-    string toStation = (*itTrainVec)->getRoute()->GetLeg(position.first)->getTo()->getName();
-    size_t distance = (*itTrainVec)->getRoute()->GetLeg(position.first)->getDistance();
+    pair<size_t, size_t> position = (*itTrains)->getPosition();
+    string fromStation = (*itTrains)->getRoute()->GetLeg(position.first)->getFrom()->getName();
+    string toStation = (*itTrains)->getRoute()->GetLeg(position.first)->getTo()->getName();
+    size_t distance = (*itTrains)->getRoute()->GetLeg(position.first)->getDistance();
     size_t fraction = position.second;
-    cout << "State of train " << (*itTrainVec)->getName() << ":" << endl;
+    cout << "State of train " << (*itTrains)->getName() << ":" << endl;
     if (fraction == 0)
     {
       cout << "At station: " << fromStation << endl;
     }
-    else if (fraction == (*itTrainVec)->getRoute()->GetLeg(position.first)->getDistance())
+    else if (fraction == (*itTrains)->getRoute()->GetLeg(position.first)->getDistance())
     {
       cout << "At station: " << toStation << endl;
     }
@@ -129,17 +131,25 @@ void printTrainStates(vector<Train*>* trains)
       cout << "On leg between " << fromStation << " and " << toStation << "(" << fraction << "/" << distance << ")" << endl;
     }
 
-    if ((*itTrainVec)->getPosition() == (*itTrainVec)->getRoute()->GetEnd())
+    bool destReached = (*itTrains)->getPosition() == (*itTrains)->getRoute()->GetEnd();
+    if (destReached)
     {
       cout << "Destination reached!" << endl;
+    }
+
+    // Did this train collide or reach its destination? => remove it from the simulation
+    if ((*itTrains)->getCollided() || destReached)
+    {
+      delete (*itTrains);
+      itTrains = trains->erase(itTrains);
+    }
+    else
+    {
+      itTrains++;
     }
   }
 }
 
-// Clean up (delete from train vector) all trains that have collided or have reached their destination
-void cleanUp(vector<Train*>* trains)
-{
-}
 
 int main()
 {
@@ -160,8 +170,7 @@ int main()
 
   while (continueSim)
   {
-    printTrainStates(trains);
-    cleanUp(trains);
+    printAndCleanUp(trains);
     cout << "Press <enter> to continue the simulation or press s(top) <enter> to stop." << endl;
     if (cin.get() == 's')
     {
@@ -174,6 +183,13 @@ int main()
   }
 
   cout << "Press any key to exit." << endl;
+  delete network;
+  while (trains->begin() != trains->end())
+  {
+    delete *(trains->begin()); // Delete the train
+    trains->erase(trains->begin()); // Erase the entry from the vector<Train*>
+  }
+  delete trains;
   _getch();
   return 0;
 }

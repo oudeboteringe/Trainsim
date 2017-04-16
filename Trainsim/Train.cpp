@@ -14,6 +14,7 @@ Train::Train(string name, Route* route, int speed):collided_(false)
 
 Train::~Train()
 {
+  delete route_;
 }
 
 vector<Train*>::iterator Train::drive(vector<Train*>* trains)
@@ -72,4 +73,9 @@ pair<size_t, size_t> Train::getPosition()
 Route * Train::getRoute()
 {
   return route_;
+}
+
+bool Train::getCollided()
+{
+  return collided_;
 }

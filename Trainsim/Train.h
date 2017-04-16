@@ -17,6 +17,7 @@ public:
   string getName();
   pair<size_t, size_t> getPosition();
   Route* getRoute();
+  bool getCollided();
 
 private:
   string name_;
