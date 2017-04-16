@@ -3,7 +3,7 @@
 #include "Route.h"
 #include "Train.h"
 
-Train::Train(string name, Route* route, int speed):collided_(false)
+Train::Train(string name, Route* route, int speed):collidedWith_(nullptr)
 {
   name_ = name;
   route_ = route;
@@ -17,10 +17,10 @@ Train::~Train()
   delete route_;
 }
 
-vector<Train*>::iterator Train::Drive(vector<Train*>* trains)
+void Train::Drive(vector<Train*>* trains)
 {
   // If the train hasn't collided and hasn't reached its destination yet, move it's position by the speed:
-  for (int iStep = 0; (iStep < speed_ && !collided_ && !(position_ == route_->GetEnd())); iStep++)
+  for (int iStep = 0; (iStep < speed_ && (collidedWith_ == nullptr) && !(position_ == route_->GetEnd())); iStep++)
   {
 
     // Have we not yet reached the end of the route?
@@ -55,9 +55,26 @@ vector<Train*>::iterator Train::Drive(vector<Train*>* trains)
       }
     }
 
-    // TODO: Have we collided?
+    // Any other trains on our leg?
+    for (vector<Train*>::iterator itTrains = trains->begin(); itTrains != trains->end(); itTrains++)
+    {
+      if (*(itTrains) != this) // Other train
+      {
+
+        // On what leg is the other train?
+        pair<size_t, size_t> posOtherTrain = (*(itTrains))->GetPosition();
+        Leg* legOtherTrain = (*(itTrains))->GetRoute()->GetLeg(posOtherTrain.first);
+        if (legOtherTrain == route_->GetLeg(position_.first)) // Same leg
+        {
+          if (posOtherTrain.second == position_.second) // Same position
+          {
+            collidedWith_ = *(itTrains);
+            (*(itTrains))->SetCollidedWith(this);
+          }
+        }
+      }
+    }
   }
-  return trains->begin(); // TODO: return iterator to ourself (default) or to conflicting train (collision).
 }
 
 string Train::GetName()
@@ -75,7 +92,12 @@ Route * Train::GetRoute()
   return route_;
 }
 
-bool Train::GetCollided()
+Train* Train::GetCollidedWith()
 {
-  return collided_;
+  return collidedWith_;
+}
+
+void Train::SetCollidedWith(Train* otherTrain)
+{
+  collidedWith_ = otherTrain;
 }

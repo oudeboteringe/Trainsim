@@ -89,19 +89,6 @@ vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
   return trains;
 }
 
-void driveTrains(vector<Train*>* trains)
-{
-  for (vector<Train*>::iterator itTrainVec = trains->begin(); itTrainVec != trains->end(); itTrainVec++)
-  {
-    vector<Train*>::iterator itOtherTrain = (*itTrainVec)->Drive(trains);
-    if ((*itOtherTrain) != *itTrainVec) // Conflict
-    {
-      //trains->erase(itOtherTrain);
-      //trains->erase(itTrainVec);
-    }
-  }
-}
-
 void printAndCleanUp(vector<Train*>* trains)
 {
   if (trains->size() <= 0)
@@ -138,8 +125,14 @@ void printAndCleanUp(vector<Train*>* trains)
     }
 
     // Did this train collide or reach its destination? => remove it from the simulation
-    if ((*itTrains)->GetCollided() || destReached)
+    Train* otherTrain = (*itTrains)->GetCollidedWith();
+    if ((otherTrain != nullptr) || destReached)
     {
+      if ((otherTrain != nullptr) && (otherTrain != (*itTrains)))
+      {
+        cout << "Train " << (*itTrains)->GetName() << " collided with train " << otherTrain->GetName() << endl;
+        otherTrain->SetCollidedWith(otherTrain); // Trick to signal other train is also to be deleted, but nothing should be printed.
+      }
       delete (*itTrains);
       itTrains = trains->erase(itTrains);
     }
@@ -178,7 +171,10 @@ int main()
     }
     if (continueSim)
     {
-      driveTrains(trains);
+      for (vector<Train*>::iterator itTrains = trains->begin(); itTrains != trains->end(); itTrains++)
+      {
+        (*itTrains)->Drive(trains);
+      }
     }
   }
 
