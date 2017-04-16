@@ -19,8 +19,12 @@ Network* readNetworkConfig(string networkConfigFilename)
   pugi::xml_parse_result result = networkConfigDoc.load_file(networkConfigFilename.c_str());
   if (!result)
   {
-    cout << "Could not load network configuration file (Network.cfg)." << endl;
-    clog << "Could not load network configuration file (Network.cfg)." << endl;
+    string msg = "Could not load network configuration file (Network.cfg): ";
+    string errorDescription = string(result.description());
+    msg += errorDescription + string(". Check character ") + std::to_string(result.offset) +
+      string(" and further (counting from the beginning of the file).");
+    cout << msg << endl;
+    clog << msg << endl;
     return nullptr;
   }
 
@@ -44,8 +48,12 @@ vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
   pugi::xml_parse_result result = trainConfigDoc.load_file(trainConfigFilename.c_str());
   if (!result)
   {
-    cout << "Could not load train configuration file (Trains.cfg)." << endl;
-    clog << "Could not load train configuration file (Trains.cfg)." << endl;
+    string msg = "Could not load train configuration file (Trains.cfg). ";
+    string errorDescription = string(result.description());
+    msg += errorDescription + string(". Check character ") + std::to_string(result.offset) +
+      string(" and further (counting from the beginning of the file).");
+    cout << msg << endl;
+    clog << msg << endl;
     return nullptr;
   }
 
@@ -166,7 +174,11 @@ int main()
   string networkConfigFilename = "./Network.cfg";
   string trainConfigFilename = "./Trains.cfg";
   Network* network = readNetworkConfig(networkConfigFilename);
-  vector<Train*>* trains = readTrainConfig(trainConfigFilename, network);
+  vector<Train*>* trains = nullptr;
+  if (network != nullptr)
+  {
+    trains = readTrainConfig(trainConfigFilename, network);
+  }
 
   bool continueSim = (network && trains);
 
