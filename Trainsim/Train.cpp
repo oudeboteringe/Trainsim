@@ -17,7 +17,7 @@ Train::~Train()
   delete route_;
 }
 
-vector<Train*>::iterator Train::drive(vector<Train*>* trains)
+vector<Train*>::iterator Train::Drive(vector<Train*>* trains)
 {
   // If the train hasn't collided and hasn't reached its destination yet, move it's position by the speed:
   for (int iStep = 0; (iStep < speed_ && !collided_ && !(position_ == route_->GetEnd())); iStep++)
@@ -60,22 +60,22 @@ vector<Train*>::iterator Train::drive(vector<Train*>* trains)
   return trains->begin(); // TODO: return iterator to ourself (default) or to conflicting train (collision).
 }
 
-string Train::getName()
+string Train::GetName()
 {
   return name_;
 }
 
-pair<size_t, size_t> Train::getPosition()
+pair<size_t, size_t> Train::GetPosition()
 {
   return position_;
 }
 
-Route * Train::getRoute()
+Route * Train::GetRoute()
 {
   return route_;
 }
 
-bool Train::getCollided()
+bool Train::GetCollided()
 {
   return collided_;
 }

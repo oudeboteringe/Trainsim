@@ -10,17 +10,17 @@ Leg::~Leg()
 {
 }
 
-Station * Leg::getFrom()
+Station * Leg::GetFrom()
 {
   return from_;
 }
 
-Station * Leg::getTo()
+Station * Leg::GetTo()
 {
   return to_;
 }
 
-size_t Leg::getDistance()
+size_t Leg::GetDistance()
 {
   return distance_;
 }

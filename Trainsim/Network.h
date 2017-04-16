@@ -15,9 +15,9 @@ class Network
 public:
   Network();
   ~Network();
-  void addStation(Station* station);
-  void addLeg(string from, string to, size_t distance);
-  pair<Leg*, int> getLeg(string from, string to);
+  void AddStation(Station* station);
+  void AddLeg(string from, string to, size_t distance);
+  pair<Leg*, int> GetLeg(string from, string to);
 
 private:
   map<string, Station*> stations_;

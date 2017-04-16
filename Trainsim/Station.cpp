@@ -10,7 +10,7 @@ Station::~Station()
 {
 }
 
-string Station::getName()
+string Station::GetName()
 {
   return name_;
 }

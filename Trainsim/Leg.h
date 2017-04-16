@@ -9,9 +9,9 @@ class Leg
 public:
   Leg(Station* from, Station* to, size_t distance);
   ~Leg();
-  Station* getFrom();
-  Station* getTo();
-  size_t getDistance();
+  Station* GetFrom();
+  Station* GetTo();
+  size_t GetDistance();
 
 private:
   Station* from_;

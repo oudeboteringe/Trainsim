@@ -30,7 +30,7 @@ Network* readNetworkConfig(string networkConfigFilename)
     string legFrom = newLeg.child("from").text().as_string();
     string legTo = newLeg.child("to").text().as_string();
     size_t legDist = (size_t)newLeg.child("distance").text().as_int();
-    network->addLeg(legFrom, legTo, legDist);
+    network->AddLeg(legFrom, legTo, legDist);
   }
 
   return network;
@@ -67,7 +67,7 @@ vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
       string nextStationName = nextStation.text().as_string();
 
       // Get this leg:
-      pair<Leg*, int> legAndDir = network->getLeg(prevStationName, nextStationName);
+      pair<Leg*, int> legAndDir = network->GetLeg(prevStationName, nextStationName);
 
       if (true)
       {
@@ -93,7 +93,7 @@ void driveTrains(vector<Train*>* trains)
 {
   for (vector<Train*>::iterator itTrainVec = trains->begin(); itTrainVec != trains->end(); itTrainVec++)
   {
-    vector<Train*>::iterator itOtherTrain = (*itTrainVec)->drive(trains);
+    vector<Train*>::iterator itOtherTrain = (*itTrainVec)->Drive(trains);
     if ((*itOtherTrain) != *itTrainVec) // Conflict
     {
       //trains->erase(itOtherTrain);
@@ -112,17 +112,17 @@ void printAndCleanUp(vector<Train*>* trains)
   vector<Train*>::iterator itTrains = trains->begin();
   while (itTrains < trains->end())
   {
-    pair<size_t, size_t> position = (*itTrains)->getPosition();
-    string fromStation = (*itTrains)->getRoute()->GetLeg(position.first)->getFrom()->getName();
-    string toStation = (*itTrains)->getRoute()->GetLeg(position.first)->getTo()->getName();
-    size_t distance = (*itTrains)->getRoute()->GetLeg(position.first)->getDistance();
+    pair<size_t, size_t> position = (*itTrains)->GetPosition();
+    string fromStation = (*itTrains)->GetRoute()->GetLeg(position.first)->GetFrom()->GetName();
+    string toStation = (*itTrains)->GetRoute()->GetLeg(position.first)->GetTo()->GetName();
+    size_t distance = (*itTrains)->GetRoute()->GetLeg(position.first)->GetDistance();
     size_t fraction = position.second;
-    cout << "State of train " << (*itTrains)->getName() << ":" << endl;
+    cout << "State of train " << (*itTrains)->GetName() << ":" << endl;
     if (fraction == 0)
     {
       cout << "At station: " << fromStation << endl;
     }
-    else if (fraction == (*itTrains)->getRoute()->GetLeg(position.first)->getDistance())
+    else if (fraction == (*itTrains)->GetRoute()->GetLeg(position.first)->GetDistance())
     {
       cout << "At station: " << toStation << endl;
     }
@@ -131,14 +131,14 @@ void printAndCleanUp(vector<Train*>* trains)
       cout << "On leg between " << fromStation << " and " << toStation << "(" << fraction << "/" << distance << ")" << endl;
     }
 
-    bool destReached = (*itTrains)->getPosition() == (*itTrains)->getRoute()->GetEnd();
+    bool destReached = (*itTrains)->GetPosition() == (*itTrains)->GetRoute()->GetEnd();
     if (destReached)
     {
       cout << "Destination reached!" << endl;
     }
 
     // Did this train collide or reach its destination? => remove it from the simulation
-    if ((*itTrains)->getCollided() || destReached)
+    if ((*itTrains)->GetCollided() || destReached)
     {
       delete (*itTrains);
       itTrains = trains->erase(itTrains);

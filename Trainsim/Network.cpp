@@ -22,12 +22,12 @@ Network::~Network()
   }
 }
 
-void Network::addStation(Station * station)
+void Network::AddStation(Station * station)
 {
-  stations_[station->getName()] = station;
+  stations_[station->GetName()] = station;
 }
 
-void Network::addLeg(string from, string to, size_t distance)
+void Network::AddLeg(string from, string to, size_t distance)
 {
   if (stations_[from] == nullptr)
   {
@@ -40,18 +40,18 @@ void Network::addLeg(string from, string to, size_t distance)
   legs_.push_back(new Leg(stations_[from], stations_[to], distance));
 }
 
-pair<Leg*, int> Network::getLeg(string from, string to)
+pair<Leg*, int> Network::GetLeg(string from, string to)
 {
   Leg* leg = nullptr;
   int dir = 0;
   for (vector<Leg*>::iterator itLegs = legs_.begin(); itLegs != legs_.end(); itLegs++)
   {
-    if ( ((*itLegs)->getFrom()->getName() == from) && ((*itLegs)->getTo()->getName() == to))
+    if ( ((*itLegs)->GetFrom()->GetName() == from) && ((*itLegs)->GetTo()->GetName() == to))
     {
       leg = *itLegs;
       dir = 1;
     }
-    else if (((*itLegs)->getFrom()->getName() == to) && ((*itLegs)->getTo()->getName() == from)) // Use leg reversed
+    else if (((*itLegs)->GetFrom()->GetName() == to) && ((*itLegs)->GetTo()->GetName() == from)) // Use leg reversed
     {
       leg = *itLegs;
       dir = -1;

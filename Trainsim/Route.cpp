@@ -30,7 +30,7 @@ int Route::GetDirection(size_t legIndex)
 
 size_t Route::GetDistance(size_t legIndex)
 {
-  return legs_.operator[](legIndex).first->getDistance();
+  return legs_.operator[](legIndex).first->GetDistance();
 }
 
 pair<size_t, size_t> Route::GetBegin()
@@ -38,14 +38,14 @@ pair<size_t, size_t> Route::GetBegin()
   size_t fraction = 0;
   if (legs_.operator[](0).second == -1) /// Reversed
   {
-    fraction = legs_.operator[](0).first->getDistance();
+    fraction = legs_.operator[](0).first->GetDistance();
   }
   return make_pair(0, fraction);
 }
 
 pair<size_t, size_t> Route::GetEnd()
 {
-  size_t fraction = (legs_.operator[](legs_.size() - 1)).first->getDistance();
+  size_t fraction = (legs_.operator[](legs_.size() - 1)).first->GetDistance();
   if ((legs_.operator[](legs_.size() - 1)).second == -1) // Traverse last leg reversed
   {
     fraction = 0;

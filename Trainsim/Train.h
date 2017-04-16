@@ -13,11 +13,11 @@ class Train
 public:
   Train(string name, Route* route, int speed);
   ~Train();
-  vector<Train*>::iterator drive(vector<Train*>* trains);
-  string getName();
-  pair<size_t, size_t> getPosition();
-  Route* getRoute();
-  bool getCollided();
+  vector<Train*>::iterator Drive(vector<Train*>* trains);
+  string GetName();
+  pair<size_t, size_t> GetPosition();
+  Route* GetRoute();
+  bool GetCollided();
 
 private:
   string name_;
