@@ -15,7 +15,12 @@ void Route::AddLeg(Leg* leg, int direction)
 
 Leg * Route::GetLeg(size_t legIndex)
 {
-  return legs_.operator[](legIndex).first;
+  Leg* leg = nullptr;
+  if (legIndex < legs_.size())
+  {
+    leg = legs_.operator[](legIndex).first;
+  }
+  return leg;
 }
 
 int Route::GetDirection(size_t legIndex)

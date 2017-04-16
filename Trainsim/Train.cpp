@@ -25,23 +25,33 @@ vector<Train*>::iterator Train::drive(vector<Train*>* trains)
     // Have we not yet reached the end of the route?
     if (!(position_ == route_->GetEnd()))
     {
+      int direction = route_->GetDirection(position_.first);
 
-      if (position_.second >= route_->GetDistance(position_.first)) // Proceed to next leg:
+      bool proceedToNextLeg = false;
+      if ((direction == 1 && position_.second >= route_->GetDistance(position_.first)-1) || // Default
+          (direction == -1 && position_.second <= 1)) // Reversed
+      {
+
+        // Proceed to next leg if there is one:
+        proceedToNextLeg = (route_->GetLeg(position_.first + 1) != nullptr);
+      }
+
+      if (proceedToNextLeg)
       {
         position_.first++;
         if (route_->GetDirection(position_.first) == 1) // Default
         {
           position_.second = 0;
         }
-        else // Reversed traversal
+        else // Reversed
         {
           position_.second = route_->GetDistance(position_.first);
         }
       }
-
-      // Move train
-      int direction = route_->GetDirection(position_.first);
-      position_.second = position_.second + direction;
+      else // Move train on same leg
+      {
+        position_.second = position_.second + direction;
+      }
     }
 
     // TODO: Have we collided?

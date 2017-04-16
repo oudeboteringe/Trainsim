@@ -26,6 +26,7 @@ Network* readNetworkConfig(string networkConfigFilename)
 
   // Construct the legs including their stations:
   for (pugi::xml_node newLeg = networkConfigDoc.child("leg"); newLeg; newLeg = newLeg.next_sibling("leg"))
+  for (pugi::xml_node newLeg = networkConfigDoc.child("Leg"); newLeg; newLeg = newLeg.next_sibling("Leg"))
   {
     string legFrom = newLeg.child("from").text().as_string();
     string legTo = newLeg.child("to").text().as_string();
@@ -148,6 +149,7 @@ int main()
   int speed = 1;
   string networkConfigFilename = "C:/Temp/Network.cfg";
   string trainConfigFilename = "C:/Temp/Trains.cfg";
+  string trainConfigFilename = ".\\Trains.cfg";
   Network* network = readNetworkConfig(networkConfigFilename);
   vector<Train*>* trainVector = readTrainConfig(trainConfigFilename, network);
 
