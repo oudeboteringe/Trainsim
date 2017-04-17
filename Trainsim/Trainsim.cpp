@@ -163,10 +163,6 @@ int main()
 
   ofstream logFile("trainsim.log");
 
-  // Get the rdbuf of clog.
-  // We need it to reset the value before exiting.
-  auto old_rdbuf = clog.rdbuf();
-
   // Set the rdbuf of clog.
   clog.rdbuf(logFile.rdbuf());
 
@@ -204,7 +200,6 @@ int main()
     }
   }
 
-  cout << "Press any key to exit." << endl;
   delete network;
   while ( (trains != nullptr) && (trains->begin() != trains->end()) )
   {
@@ -213,10 +208,6 @@ int main()
   }
   delete trains;
 
-  // Reset the rdbuf of clog.
-  clog.rdbuf(old_rdbuf);
-
-  _getch();
   return 0;
 }
 
