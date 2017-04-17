@@ -42,12 +42,12 @@ Network* readNetworkConfig(string networkConfigFilename)
     string legFrom = newLeg.child("from").text().as_string();
     if (legFrom == "")
     {
-      msg += "Error in leg: invalid \"from\" station.\n";
+      msg += "Error in leg specification: invalid \"from\" station.\n";
     }
     string legTo = newLeg.child("to").text().as_string();
     if (legTo == "")
     {
-      msg += "Error in leg: invalid \"to\" station.\n";
+      msg += "Error in leg specification: invalid \"to\" station.\n";
     }
     int legDist = -1;
     string legDistString = newLeg.child("distance").text().as_string();
@@ -57,7 +57,7 @@ Network* readNetworkConfig(string networkConfigFilename)
     }
     if (legDist <= 0)
     {
-      msg += "Error in leg: invalid distance.\n";
+      msg += "Error in leg specification: invalid distance.\n";
     }
     if(msg == "") // No errors in leg
     {
@@ -87,11 +87,12 @@ Network* readNetworkConfig(string networkConfigFilename)
 
 vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
 {
+  string msg = "";
   pugi::xml_document trainConfigDoc;
   pugi::xml_parse_result result = trainConfigDoc.load_file(trainConfigFilename.c_str());
   if (!result)
   {
-    string msg = "Could not load train configuration file (Trains.cfg): ";
+    msg = "Could not load train configuration file (Trains.cfg): ";
     string errorDescription = string(result.description());
     msg += errorDescription + ".";
     if (result.status != 1) // Error other than file not found
@@ -107,45 +108,77 @@ vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
   vector<Train*>* trains = new vector<Train*>;
 
   // Retreive the data for the trains:
+  msg = "";
+  int nTrains = 0;
   for (pugi::xml_node newTrain = trainConfigDoc.child("train"); newTrain; newTrain = newTrain.next_sibling("train"))
   {
     string name = newTrain.child("name").text().as_string();
-    int speed = newTrain.child("speed").text().as_int();
+    if (name == "")
+    {
+      msg += string("Error in train specification of train ") + to_string(nTrains + 1) +
+        " in train configuration file (Trains.cfg): invalid name\n";
+    }
+    int speed = -1;
+    string speedString = newTrain.child("speed").text().as_string();
+    if (speedString != "")
+    {
+      speed = atoi(speedString.c_str());
+    }
+    if (speed <= 0)
+    {
+      msg += string("Error in train specification of train ") + to_string(nTrains + 1) +
+        " in train configuration file (Trains.cfg): invalid speed\n";
+    }
     pugi::xml_node route = newTrain.child("route");
-
-    // Construct the route of this train:
-    Route* newRoute = new Route;
+    if (route == nullptr)
+    {
+      msg += string("Error in specification of train ") + to_string(nTrains + 1) +
+        " in train configuration file (Trains.cfg): invalid route\n";
+    }
 
     pugi::xml_node prevStation = route.child("station");              // First time: first station
     pugi::xml_node nextStation = prevStation.next_sibling("station"); // First time: second station
 
-    while (nextStation)
+    if (msg == "")
     {
-      string prevStationName = prevStation.text().as_string();
-      string nextStationName = nextStation.text().as_string();
+      Route* newRoute = new Route; // Construct the route for this train
 
-      // Get this leg:
-      pair<Leg*, int> legAndDir = network->GetLeg(prevStationName, nextStationName);
-
-      if (legAndDir.first != nullptr)
+      while (nextStation && (msg == ""))
       {
-        // Add this leg to the route:
-        newRoute->AddLeg(legAndDir.first, legAndDir.second);
-      }
-      else
-      {
-        string msg = string("Error: route of train ") + name + " uses leg from " + prevStationName + " to " +
-          nextStationName + ", but this leg is not specified in the network configuration file (Network.cfg).\n";
-        msg += "This leg could not be added to the route of train " + name + ".\n";
-        cout << msg << endl;
-        clog << msg << endl;
-      }
+        string prevStationName = prevStation.text().as_string();
+        string nextStationName = nextStation.text().as_string();
 
-      prevStation = nextStation;
-      nextStation = nextStation.next_sibling("station");
+        // Get this leg:
+        pair<Leg*, int> legAndDir = network->GetLeg(prevStationName, nextStationName);
+
+        if (legAndDir.first != nullptr)
+        {
+          // Add this leg to the route:
+          newRoute->AddLeg(legAndDir.first, legAndDir.second);
+        }
+        else
+        {
+          msg += string("Error: route of train ") + name + " uses leg from " + prevStationName + " to " +
+            nextStationName + ", but this leg is not specified in the network configuration file (Network.cfg).\n";
+          msg += "This leg could not be added to the route of train " + name + ".\n";
+        }
+
+        prevStation = nextStation;
+        nextStation = nextStation.next_sibling("station");
+      }
+      if (msg == "")
+      {
+        Train* train = new Train(name, newRoute, speed);
+        trains->push_back(train);
+        nTrains++;
+      }
     }
-    Train* train = new Train(name, newRoute, speed);
-    trains->push_back(train);
+    if (msg != "")
+    {
+      cout << msg << endl;
+      clog << msg << endl;
+      return nullptr;
+    }
   }
 
   return trains;
