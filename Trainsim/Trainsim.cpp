@@ -14,12 +14,12 @@ using namespace std;
 
 Network* readNetworkConfig(string networkConfigFilename)
 {
-
+  string msg = "";
   pugi::xml_document networkConfigDoc;
   pugi::xml_parse_result result = networkConfigDoc.load_file(networkConfigFilename.c_str());
   if (!result)
   {
-    string msg = "Could not load network configuration file (Network.cfg): ";
+    msg = "Could not load network configuration file (Network.cfg): ";
     string errorDescription = string(result.description());
     msg += errorDescription + ".";
     if (result.status != 1) // Error other than file not found
@@ -35,12 +35,23 @@ Network* readNetworkConfig(string networkConfigFilename)
   Network* network = new Network();
 
   // Construct the legs including their stations:
+  int nLegs = 0;
   for (pugi::xml_node newLeg = networkConfigDoc.child("leg"); newLeg; newLeg = newLeg.next_sibling("leg"))
   {
     string legFrom = newLeg.child("from").text().as_string();
     string legTo = newLeg.child("to").text().as_string();
     size_t legDist = (size_t)newLeg.child("distance").text().as_int();
     network->AddLeg(legFrom, legTo, legDist);
+    nLegs++;
+  }
+
+  // No valid legs found? => error
+  if (nLegs == 0)
+  {
+    msg = "Error: no valid legs found in network configuration file (Network.cfg).";
+    cout << msg << endl;
+    clog << msg << endl;
+    return nullptr;
   }
 
   return network;
@@ -88,14 +99,18 @@ vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
       // Get this leg:
       pair<Leg*, int> legAndDir = network->GetLeg(prevStationName, nextStationName);
 
-      if (true)
+      if (legAndDir.first != nullptr)
       {
         // Add this leg to the route:
         newRoute->AddLeg(legAndDir.first, legAndDir.second);
       }
       else // TODO: error handling
       {
-        ;
+        string msg = string("Error: route of train ") + name + " uses leg from " + prevStationName + " to " +
+          nextStationName + ", but this leg is not specified in the network configuration file (Network.cfg).\n";
+        msg += "This leg could not be added to the route of train " + name + ".\n";
+        cout << msg << endl;
+        clog << msg << endl;
       }
 
       prevStation = nextStation;
