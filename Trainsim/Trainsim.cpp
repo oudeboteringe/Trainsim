@@ -24,7 +24,7 @@ Network* readNetworkConfig(string networkConfigFilename)
     msg += errorDescription + ".";
     if (result.status != 1) // Error other than file not found
     {
-      msg += string(". Check character ") + std::to_string(result.offset) +
+      msg += string(". Check character ") + to_string(result.offset) +
         string(" and further (counting from the beginning of the file).");
     }
     cout << msg << endl;
@@ -35,14 +35,42 @@ Network* readNetworkConfig(string networkConfigFilename)
   Network* network = new Network();
 
   // Construct the legs including their stations:
+  msg = "";
   int nLegs = 0;
   for (pugi::xml_node newLeg = networkConfigDoc.child("leg"); newLeg; newLeg = newLeg.next_sibling("leg"))
   {
     string legFrom = newLeg.child("from").text().as_string();
+    if (legFrom == "")
+    {
+      msg += "Error in leg: invalid \"from\" station.\n";
+    }
     string legTo = newLeg.child("to").text().as_string();
-    size_t legDist = (size_t)newLeg.child("distance").text().as_int();
-    network->AddLeg(legFrom, legTo, legDist);
-    nLegs++;
+    if (legTo == "")
+    {
+      msg += "Error in leg: invalid \"to\" station.\n";
+    }
+    int legDist = -1;
+    string legDistString = newLeg.child("distance").text().as_string();
+    if (legDistString != "")
+    {
+      legDist = atoi(legDistString.c_str());
+    }
+    if (legDist <= 0)
+    {
+      msg += "Error in leg: invalid distance.\n";
+    }
+    if(msg == "") // No errors in leg
+    {
+      network->AddLeg(legFrom, legTo, legDist);
+      nLegs++;
+    }
+    else
+    {
+      msg = string("Error in leg ") + to_string(nLegs+1) + " in network configuration file (Network.cfg):\n" + msg;
+      cout << msg << endl;
+      clog << msg << endl;
+      return nullptr;
+    }
   }
 
   // No valid legs found? => error
@@ -68,7 +96,7 @@ vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
     msg += errorDescription + ".";
     if (result.status != 1) // Error other than file not found
     {
-      msg += string(". Check character ") + std::to_string(result.offset) +
+      msg += string(". Check character ") + to_string(result.offset) +
         string(" and further (counting from the beginning of the file).");
     }
     cout << msg << endl;
