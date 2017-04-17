@@ -21,8 +21,12 @@ Network* readNetworkConfig(string networkConfigFilename)
   {
     string msg = "Could not load network configuration file (Network.cfg): ";
     string errorDescription = string(result.description());
-    msg += errorDescription + string(". Check character ") + std::to_string(result.offset) +
-      string(" and further (counting from the beginning of the file).");
+    msg += errorDescription + ".";
+    if (result.status != 1) // Error other than file not found
+    {
+      msg += string(". Check character ") + std::to_string(result.offset) +
+        string(" and further (counting from the beginning of the file).");
+    }
     cout << msg << endl;
     clog << msg << endl;
     return nullptr;
@@ -48,10 +52,14 @@ vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
   pugi::xml_parse_result result = trainConfigDoc.load_file(trainConfigFilename.c_str());
   if (!result)
   {
-    string msg = "Could not load train configuration file (Trains.cfg). ";
+    string msg = "Could not load train configuration file (Trains.cfg): ";
     string errorDescription = string(result.description());
-    msg += errorDescription + string(". Check character ") + std::to_string(result.offset) +
-      string(" and further (counting from the beginning of the file).");
+    msg += errorDescription + ".";
+    if (result.status != 1) // Error other than file not found
+    {
+      msg += string(". Check character ") + std::to_string(result.offset) +
+        string(" and further (counting from the beginning of the file).");
+    }
     cout << msg << endl;
     clog << msg << endl;
     return nullptr;
@@ -181,6 +189,11 @@ int main()
   if (continueSim)
   {
     cout << "Initial states of the trains:" << endl;
+  }
+  else
+  {
+    cout << "Program termination, press any key to exit." << endl;
+    _getch();
   }
 
   while (continueSim)
