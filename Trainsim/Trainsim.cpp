@@ -161,7 +161,7 @@ int main()
 {
   cout << "Welcome to trainsim, a basic train simulation program." << endl;
 
-  ofstream logFile("trainsim.log");
+  ofstream logFile("Trainsim.log");
 
   // Set the rdbuf of clog.
   clog.rdbuf(logFile.rdbuf());
