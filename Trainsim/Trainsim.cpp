@@ -104,7 +104,7 @@ vector<Train*>* readTrainConfig(string trainConfigFilename, Network* network)
         // Add this leg to the route:
         newRoute->AddLeg(legAndDir.first, legAndDir.second);
       }
-      else // TODO: error handling
+      else
       {
         string msg = string("Error: route of train ") + name + " uses leg from " + prevStationName + " to " +
           nextStationName + ", but this leg is not specified in the network configuration file (Network.cfg).\n";
