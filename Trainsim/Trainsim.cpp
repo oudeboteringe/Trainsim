@@ -1,6 +1,27 @@
 // Trainsim.cpp : Defines the entry point for the console application.
 //
 
+/*! \mainpage My Personal Index Page
+*
+* \section intro_sec Introduction
+*
+* This is the introduction.
+*
+* \section install_sec Installation
+*
+* \subsection step1 Step 1: Opening the box
+*
+* etc...
+*/
+
+/**
+* ... text1 ...
+*/
+
+///
+/// ... text2 ...
+///
+
 #include "stdafx.h"
 #include <conio.h>
 #include <fstream>
